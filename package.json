@@ -65,12 +65,12 @@
     "broccoli-react": "^0.8.0",
     "ember-auto-import": "^1.0.1",
     "ember-cli-babel": "^6.3.0",
-    "react": "^15.5.4 || ^16.0.0",
-    "react-dom": "^15.5.4 || ^16.0.0"
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
   },
   "peerDependencies": {
-    "react": "^15.5.4 || ^16.0.0",
-    "react-dom": "^15.5.4 || ^16.0.0"
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"

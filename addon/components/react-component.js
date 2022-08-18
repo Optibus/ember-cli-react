@@ -1,6 +1,6 @@
 import Ember from 'ember';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import YieldWrapper from './react-component/yield-wrapper';
 
 import getMutableAttributes from 'ember-cli-react/utils/get-mutable-attributes';
@@ -10,6 +10,7 @@ import lookupFactory from 'ember-cli-react/utils/lookup-factory';
 const { get } = Ember;
 
 const ReactComponent = Ember.Component.extend({
+  _rootElem: null,
   /**
     The React component that this Ember component should wrap.
 
@@ -76,14 +77,17 @@ const ReactComponent = Ember.Component.extend({
       }
     }
 
-    ReactDOM.render(
-      React.createElement(componentClass, props, children),
+    const component = React.createElement(componentClass, props, children);
+    this._rootElem = ReactDOM.createRoot(
       get(this, 'element')
     );
+
+    this._rootElem.render(component);
   },
 
   willDestroyElement: function() {
-    ReactDOM.unmountComponentAtNode(get(this, 'element'));
+    this._rootElem.unmount();
+    // ReactDOM.unmountComponentAtNode(get(this, 'element'));
   },
 });
 

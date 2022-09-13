@@ -2,7 +2,6 @@ import Ember from 'ember';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import YieldWrapper from './react-component/yield-wrapper';
-
 import getMutableAttributes from 'ember-cli-react/utils/get-mutable-attributes';
 import hasBlock from 'ember-cli-react/utils/has-block';
 import lookupFactory from 'ember-cli-react/utils/lookup-factory';
@@ -11,20 +10,16 @@ const { get } = Ember;
 
 const ReactComponent = Ember.Component.extend({
   _rootElem: null,
+
   /**
     The React component that this Ember component should wrap.
-
     @property reactComponent
     @type React.Component | Function | String
     @default null
    */
   reactComponent: Ember.computed.reads('_reactComponent'),
 
-  didRender: function() {
-    this.renderReactComponent();
-  },
-
-  renderReactComponent() {
+  getReactComponent() {
     const componentClassOrName = get(this, 'reactComponent');
     let componentClass;
 
@@ -46,8 +41,14 @@ const ReactComponent = Ember.Component.extend({
       );
     }
 
-    const props = getMutableAttributes(get(this, 'attrs'));
+    return componentClass;
+  },
 
+  getProps() {
+    return getMutableAttributes(get(this, 'attrs'));
+  },
+
+  getChildren(props) {
     // Determine the children
     // If there is already `children` in `props`, we just pass it down (it can be function).
     // Otherwise we need to wrap the current `childNodes` inside a React component.
@@ -76,18 +77,32 @@ const ReactComponent = Ember.Component.extend({
         ];
       }
     }
-
-    const component = React.createElement(componentClass, props, children);
-    this._rootElem = ReactDOM.createRoot(
-      get(this, 'element')
-    );
-
-    this._rootElem.render(component);
+    return children;
   },
 
-  willDestroyElement: function() {
-    this._rootElem.unmount();
-    // ReactDOM.unmountComponentAtNode(get(this, 'element'));
+  renderReact() {
+    const componentClass = this.getReactComponent();
+    const props = this.getProps();
+    const children = this.getChildren(props);
+    const component = React.createElement(componentClass, props, children);
+    if (this._rootElem) {
+      this._rootElem.render(component);
+    }
+  },
+
+  didInsertElement() {
+    this._rootElem = ReactDOM.createRoot(get(this, 'element'));
+    this.renderReact();
+  },
+
+  didReceiveAttrs() {
+    this.renderReact();
+  },
+
+  willDestroyElement() {
+    if (this._rootElem) {
+      this._rootElem.unmount();
+    }
   },
 });
 

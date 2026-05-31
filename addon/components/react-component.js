@@ -1,10 +1,12 @@
 import Ember from 'ember';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { flushSync } from 'react-dom';
 import YieldWrapper from './react-component/yield-wrapper';
 import getMutableAttributes from 'ember-cli-react/utils/get-mutable-attributes';
 import hasBlock from 'ember-cli-react/utils/has-block';
 import lookupFactory from 'ember-cli-react/utils/lookup-factory';
+import { shouldSyncMount } from 'ember-cli-react/utils/sync-mount';
 
 const { get } = Ember;
 
@@ -86,7 +88,12 @@ const ReactComponent = Ember.Component.extend({
     const children = this.getChildren(props);
     const component = React.createElement(componentClass, props, children);
     if (this._rootElem) {
-      this._rootElem.render(component);
+      const name = get(this, '_reactComponent');
+      if (typeof name === 'string' && shouldSyncMount(name)) {
+        flushSync(() => this._rootElem.render(component));
+      } else {
+        this._rootElem.render(component);
+      }
     }
   },
 

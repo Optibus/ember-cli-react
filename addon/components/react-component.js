@@ -90,7 +90,14 @@ const ReactComponent = Ember.Component.extend({
     if (this._rootElem) {
       const name = get(this, '_reactComponent');
       if (typeof name === 'string' && shouldSyncMount(name)) {
+        // OS-83133 instrumentation: surface entry/exit of the sync render so
+        // we can see whether Ember calls didInsertElement for all siblings
+        // in the same task or yields between them. Remove once diagnosed.
+        // eslint-disable-next-line no-console
+        console.log(`[ecr-perf] ${performance.now().toFixed(1)}ms  flushSync(render) ENTER  ${name}`);
         flushSync(() => this._rootElem.render(component));
+        // eslint-disable-next-line no-console
+        console.log(`[ecr-perf] ${performance.now().toFixed(1)}ms  flushSync(render) EXIT   ${name}`);
       } else {
         this._rootElem.render(component);
       }
@@ -98,8 +105,17 @@ const ReactComponent = Ember.Component.extend({
   },
 
   didInsertElement() {
+    const name = get(this, '_reactComponent');
+    if (typeof name === 'string' && shouldSyncMount(name)) {
+      // eslint-disable-next-line no-console
+      console.log(`[ecr-perf] ${performance.now().toFixed(1)}ms  didInsertElement ENTER  ${name}`);
+    }
     this._rootElem = ReactDOM.createRoot(get(this, 'element'));
     this.renderReact();
+    if (typeof name === 'string' && shouldSyncMount(name)) {
+      // eslint-disable-next-line no-console
+      console.log(`[ecr-perf] ${performance.now().toFixed(1)}ms  didInsertElement EXIT   ${name}`);
+    }
   },
 
   didReceiveAttrs() {

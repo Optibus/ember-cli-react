@@ -88,8 +88,18 @@ const ReactComponent = Ember.Component.extend({
     const children = this.getChildren(props);
     const component = React.createElement(componentClass, props, children);
     if (this._rootElem) {
+      // _resolvedName is set by the resolver for template-resolved components
+      // (e.g. {{my-react-comp}}); _reactComponent is set by positional
+      // invocations (e.g. {{react-component "my-react-comp"}}). Either way,
+      // we end up with the kebab-case container key as a string.
       const name = get(this, '_resolvedName') || get(this, '_reactComponent');
       if (typeof name === 'string' && shouldSyncMount(name)) {
+        // Plain root.render() schedules the work on React 18's concurrent
+        // scheduler, which yields between roots — so many sibling React
+        // mounts produce a visible cascade of paints. flushSync forces this
+        // root's render + commit to finish before returning, so when many
+        // siblings opt in they all mount in the same task and the browser
+        // paints once at the end.
         flushSync(() => this._rootElem.render(component));
       } else {
         this._rootElem.render(component);

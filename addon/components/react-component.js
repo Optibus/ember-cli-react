@@ -88,7 +88,7 @@ const ReactComponent = Ember.Component.extend({
     const children = this.getChildren(props);
     const component = React.createElement(componentClass, props, children);
     if (this._rootElem) {
-      const name = get(this, '_reactComponent');
+      const name = get(this, '_resolvedName') || get(this, '_reactComponent');
       if (typeof name === 'string' && shouldSyncMount(name)) {
         flushSync(() => this._rootElem.render(component));
       } else {

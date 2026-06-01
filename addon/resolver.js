@@ -28,6 +28,7 @@ export default Resolver.extend({
       // This enables using React Components directly in template
       return ReactComponent.extend({
         reactComponent: result,
+        _resolvedName: parsedName.fullNameWithoutType,
       });
     }
   },

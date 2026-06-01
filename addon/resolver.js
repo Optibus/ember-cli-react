@@ -28,6 +28,11 @@ export default Resolver.extend({
       // This enables using React Components directly in template
       return ReactComponent.extend({
         reactComponent: result,
+        // Stash the kebab-case name (e.g. "gantt/tooltip/i-warnings-r") so
+        // shouldSyncMount can match against it at render time. This is the
+        // only place the name is available; the wrapped component instance
+        // doesn't otherwise know what it was looked up as.
+        _resolvedName: parsedName.fullNameWithoutType,
       });
     }
   },
